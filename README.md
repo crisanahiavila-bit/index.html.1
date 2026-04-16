@@ -4,82 +4,63 @@
 <meta charset="UTF-8">
 <title>Acceso CONALEP</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
 <style>
 body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.box {
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
-    padding: 30px;
-    border-radius: 20px;
-    width: 320px;
+    font-family: Arial;
     text-align: center;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
     color: white;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-h2 {
-    margin-bottom: 10px;
+#reader {
+    width: 300px;
+    margin: auto;
+    border-radius: 15px;
+    overflow: hidden;
 }
 
-input {
-    width: 90%;
-    padding: 12px;
-    margin: 10px 0;
+#status {
+    margin-top: 20px;
+    padding: 15px;
     border-radius: 10px;
-    border: none;
-    outline: none;
-}
-
-button {
-    width: 95%;
-    padding: 12px;
-    border: none;
-    border-radius: 25px;
-    background: linear-gradient(135deg, #00f2fe, #4facfe);
-    font-weight: bold;
-    cursor: pointer;
-}
-
-#resultado {
-    margin-top: 15px;
     font-weight: bold;
 }
+.success { background: #00c853; }
+.error { background: #d50000; }
 </style>
 </head>
 
 <body>
 
-<div class="box">
-    <h2>🔐 Acceso CONALEP</h2>
-    <p>Ingresa tu matrícula</p>
+<h2>📷 Escaneo de Credencial</h2>
+<p>CONALEP 109</p>
 
-    <input type="text" id="matricula" placeholder="Ej: 23012345">
-
-    <button onclick="verificar()">Ingresar</button>
-
-    <div id="resultado"></div>
-</div>
+<div id="reader"></div>
+<div id="status">Esperando escaneo...</div>
 
 <script>
-function verificar() {
-    let matricula = document.getElementById("matricula").value;
+function onScanSuccess(decodedText) {
 
     // Ejemplo de validación
-    if (matricula.length >= 8) {
-        document.getElementById("resultado").innerText = "✅ Acceso permitido";
+    if (decodedText.length >= 8) {
+        document.getElementById("status").innerText =
+        "✅ Acceso permitido\nMatrícula: " + decodedText;
+        document.getElementById("status").className = "success";
     } else {
-        document.getElementById("resultado").innerText = "❌ Acceso denegado";
+        document.getElementById("status").innerText =
+        "❌ Acceso denegado";
+        document.getElementById("status").className = "error";
     }
 }
+
+let scanner = new Html5QrcodeScanner(
+    "reader",
+    { fps: 10, qrbox: 250 }
+);
+
+scanner.render(onScanSuccess);
 </script>
 
 </body>
