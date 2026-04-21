@@ -2,64 +2,127 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Acceso CONALEP</title>
+<title>Control de Acceso por Matrícula</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 body {
     font-family: Arial;
     text-align: center;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: white;
+    background: #f4f6f8;
+}
+
+input {
+    padding: 10px;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+    font-size: 16px;
 }
 
 #reader {
     width: 300px;
     margin: auto;
-    border-radius: 15px;
-    overflow: hidden;
 }
 
-#status {
+#resultado {
     margin-top: 20px;
-    padding: 15px;
-    border-radius: 10px;
+    font-size: 20px;
     font-weight: bold;
 }
-.success { background: #00c853; }
-.error { background: #d50000; }
+
+.ok { color: green; }
+.error { color: red; }
+
+#registro {
+    margin-top: 20px;
+    font-size: 14px;
+}
 </style>
 </head>
 
 <body>
 
-<h2>📷 Escaneo de Credencial</h2>
-<p>CONALEP 109</p>
+<h2>Control de Acceso (Matrícula)</h2>
+
+<input type="text" id="matricula" placeholder="Ingresa matrícula">
+<br>
+
+<button onclick="verificar()">Verificar</button>
+<button onclick="iniciarEscaner()">Escanear</button>
 
 <div id="reader"></div>
-<div id="status">Esperando escaneo...</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<div id="resultado">Esperando...</div>
 
-    // Ejemplo de validación
-    if (decodedText.length >= 8) {
-        document.getElementById("status").innerText =
-        "✅ Acceso permitido\nMatrícula: " + decodedText;
-        document.getElementById("status").className = "success";
+<div id="registro"></div>
+
+<script>
+
+// 📚 Base de datos simulada
+const baseDatos = [
+    { matricula: "2023001", nombre: "Juan Pérez" },
+    { matricula: "2023002", nombre: "Ana López" },
+    { matricula: "2023003", nombre: "Luis García" }
+];
+
+// 📝 Registro de accesos
+let historial = [];
+
+// 🔍 Verificar acceso
+function verificar(codigo) {
+    let matricula = codigo || document.getElementById("matricula").value;
+    const alumno = baseDatos.find(a => a.matricula === matricula);
+
+    const resultado = document.getElementById("resultado");
+
+    let mensaje = "";
+    let estado = "";
+
+    if (alumno) {
+        mensaje = `✅ Acceso permitido: ${alumno.nombre}`;
+        estado = "ok";
     } else {
-        document.getElementById("status").innerText =
-        "❌ Acceso denegado";
-        document.getElementById("status").className = "error";
+        mensaje = "❌ Acceso denegado";
+        estado = "error";
     }
+
+    resultado.innerHTML = mensaje;
+    resultado.className = estado;
+
+    // Guardar registro
+    let fecha = new Date().toLocaleString();
+    historial.push(`${fecha} - ${matricula} - ${mensaje}`);
+
+    mostrarRegistro();
 }
 
-let scanner = new Html5QrcodeScanner(
-    "reader",
-    { fps: 10, qrbox: 250 }
-);
+// 📋 Mostrar historial
+function mostrarRegistro() {
+    document.getElementById("registro").innerHTML =
+        "<b>Historial:</b><br>" + historial.join("<br>");
+}
 
-scanner.render(onScanSuccess);
+// 📷 Escáner
+let scanner;
+
+function iniciarEscaner() {
+    scanner = new Html5QrcodeScanner("reader", {
+        fps: 10,
+        qrbox: 250
+    });
+
+    scanner.render((texto) => {
+        verificar(texto);
+        scanner.clear();
+    });
+}
+
 </script>
 
 </body>
